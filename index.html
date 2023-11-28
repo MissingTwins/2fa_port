@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Number Submission</title>
+	<script>
+	document.addEventListener('DOMContentLoaded', function() {
+
+		var ip4vInput = document.getElementById('ipv4');
+		var ip6vInput = document.getElementById('ipv6');
+		
+		// Add loading effect
+		ip4vInput.classList.add('loading');
+		ip6vInput.classList.add('loading');
+
+		// Fetch and set the client's IP address
+		fetch('https://api4.my-ip.io/v2/ip.txt')
+			.then(response => response.text())
+			.then(ip => {
+				ip4vInput.value = ip.split('\n')[0]; // Set the first line (IP address) as value
+				ip4vInput.classList.remove('loading'); // Remove loading effect
+				ip4vInput.classList.add('success');
+			})
+			.catch(error => {
+				console.error('Error fetching IPv4:', error);
+				ip4vInput.classList.remove('loading'); // Remove loading effect
+				ip4vInput.classList.add('fail'); // Add fail class for pink background
+			});
+
+		fetch('https://api6.my-ip.io/v2/ip.txt')
+			.then(response => response.text())
+			.then(ip => {
+				ip6vInput.value = ip.split('\n')[0]; // Set the first line (IP address) as value
+				ip6vInput.classList.remove('loading'); // Remove loading effect
+				ip6vInput.classList.add('success');
+			})
+			.catch(error => {
+				console.error('Error fetching IPv6:', error);
+				ip6vInput.classList.remove('loading'); // Remove loading effect
+				ip6vInput.classList.add('fail'); // Add fail class for pink background
+			});
+
+		// Event listener to select all text on focus
+		document.getElementById('numberInput').addEventListener('focus', function(event) {
+				event.target.select();
+			});
+
+		// Event listener for form submission
+		document.getElementById('numberForm').addEventListener('submit', function(event) {
+			event.preventDefault();
+
+			var number = document.getElementById('numberInput').value;
+			var ipv4 = document.getElementById('ipv4').value;
+			var ipv6 = document.getElementById('ipv6').value;
+			if (number.length != 6) {
+				alert("Please enter exactly 6 digits.");
+				return;
+			}
+			fetch('', { 
+				method: 'POST', 
+				body: new URLSearchParams({ 'key': number, 'ipv4': ipv4, 'ipv6': ipv6 }) 
+			})
+			.then(response => {
+				if (response.status === 200) {
+					document.getElementById('responseMessage').innerText = 'PASS';
+					document.getElementById('responseMessage').className = 'pass';
+				} else if (response.status === 403) {
+					document.getElementById('responseMessage').innerText = 'FAIL';
+					document.getElementById('responseMessage').className = 'fail';
+				} else {
+					response.text().then(text => {
+						document.getElementById('responseMessage').innerText = text;
+						document.getElementById('responseMessage').className = '';
+					});
+				}
+			})
+			.catch(error => {
+				console.error('Error:', error);
+			});
+		});
+		});
+	</script>
+	<style type="text/css" >
+		#responseMessage.pass {
+			background-color: green;
+			color: white;
+		}
+
+		#responseMessage.fail {
+			background-color: pink;
+			color: white;
+		}
+
+		#responseMessage {
+			margin-top: 10px;
+			padding: 5px;
+			text-align: center;
+		}
+
+		/* Loading effect */
+		@keyframes loading {
+			0% { background-color: lightgray; }
+			50% { background-color: silver; }
+			100% { background-color: lightgray; }
+		}
+
+		.loading {
+			animation: loading 0.5s infinite;
+		}
+
+		.success {
+			background-color: lightgreen;
+		}
+
+		.fail {
+			background-color: pink;
+		}
+	</style>
+</head>
+<body>
+	<form id="numberForm">
+	<input type="text" id="numberInput" pattern="\d{6}" maxlength="6" placeholder="Enter OTA 6 digits" required  autocomplete="off"><br>
+	<input type="text" id="ipv4" placeholder="IPv4 Address" readonly><br>
+	<input type="text" id="ipv6" placeholder="IPv6 Address" readonly><br>
+		<button type="submit">Submit</button>
+	</form>
+	<div id="responseMessage"></div>
+</body>
+</html>
