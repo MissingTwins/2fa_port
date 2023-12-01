@@ -19,6 +19,7 @@ fi
 source "$script_path/2fa.sh"
 source "$script_path/opt.sh"
 secret_key=$(cat "$script_path/secret_key.txt")
+secret_key=${secret_key^^}
 
 # -----------------------------------
 function finish() { 
