@@ -52,9 +52,9 @@ endheader() {
 	printf "HTTP/1.0 %s\r\n" "$RESPONSE_CODE"
 	printf "Cache-Control: no-store,no-cache\r\n"
 	printf "Content-Type: %s\r\n" "$CONTENT_TYPE"
-	txtBody="${txtBody//%/%%}"
-	byteCNT=$(printf "$txtBody" | wc -c)
-	LineCNT=$(printf "$txtBody" | wc -l)
+#	txtBody="${txtBody//%/%%}"
+	byteCNT=$(printf "%s" "$txtBody" | wc -c)
+	LineCNT=$(printf "%s" "$txtBody" | wc -l)
 #	totalCNT=`expr $byteCNT + $LineCNT`
 	printf "Content-Length: %d\r\n" "$byteCNT"
 	printf "%s\r\n" "$headers" # End of headers
@@ -67,7 +67,7 @@ endheader() {
 	echoerr "[ ] $RESPONSE_CODE $LineCNT lines $byteCNT bytes | $HTTP_DEBUG"
 	echoerr ""
 	echoerr ""
-	"$bin_path/"sleep 0.2
+#	"$bin_path/"sleep 0.2
 	exit 0;
 }
 
