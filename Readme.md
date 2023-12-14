@@ -18,21 +18,26 @@ This project comprises five files:
  - 4. index.html: The WebUI for you to input 2fa code.
  - 5. secret_key.txt: Your private key.(Empty YOU MUST GENERATE YOURS) This can be used with 1Password, Google Authenticator, or Microsoft Authenticator.
 
+
 Setup environment and dependencies  
 `opkg update && opkg install bash`  
 `nano /jffs/configs/profile.add`  
 `	[ -f /opt/bin/bash ] && exec /opt/bin/bash`  
-`opkg install xxd coreutils-base32 coreutils-sleep coreutils-date`
+Dependencies  
+`opkg install xxd coreutils-base32 coreutils-date`  
+
 
 You can generate the private key using the command:  
 `source ./2fa.sh; keygen | tee secret_key.txt`  
 `RD76DLH7WBOGF56JHZALFHEMXQ2JRV5Y`  
+
 
 The script can be launched as(replace 192.168.77.1 with your own router LAN IP)  
 `chmod +x .port_guard.sh`  
 `socat -d TCP4-LISTEN:65432,reuseaddr,fork,bind=192.168.77.1 SYSTEM:/opt/etc/rdp/port_guard.sh,pipes`  
 Then access the WebUI by  
 `http://192.168.77.1:65432`  
+
 
 ## Setup https
 - 1. Download your personal domain name cert and key put them inside a folder such as domain.com
@@ -46,6 +51,7 @@ nano /opt/etc/rdp/stunnel.cfg
 	connect = 192.168.77.1:7777
 	cert = /opt/etc/rdp/domain.com/certificate.cer 
 	key = /opt/etc/rdp/domain.com/private.key
+	protocol = proxy
 ```
 - 4. Start stunnel
 `stunnel /opt/etc/rdp/stunnel.cfg`
