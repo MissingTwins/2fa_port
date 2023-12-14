@@ -142,22 +142,31 @@ getValueByKey() {
 # -----------------------------------
 	LINES=`timeout 0.3s cat`
 	LINE_CLEAN=$(echo -n "$LINES" | tr -d "\r" )
+	echoerr "From: $SOCAT_PEERADDR"
 	echoerr "--LINE_CLEAN--"
 	echoerr "$LINE_CLEAN"
 
 # ---------------------------------------------------
-	# Regular expression to match the HTTP method and path
-	regex_path="^GET (.*) HTTP/1.[01]"
+	# Regular expression to match the HTTP method and HTTP_PATH
+	regex_path="(^|$LF)GET (.*) HTTP/1.[01]"
 	if [[ "$LINE_CLEAN" =~ $regex_path ]];then
-			path="${BASH_REMATCH[1]}"
+			HTTP_PATH="${BASH_REMATCH[2]}"
 			echoerr ""
-			echoerr "path $path"
+			echoerr "HTTP_PATH $HTTP_PATH"
 	fi
 
 	# ---------------------------------------------------
 	regex_key="key=([0-9]{6})" #string="key=123456"
-
-	if [[ "$LINE_CLEAN" =~ $regex_key ]]; then
+	if [ -z "$LINE_CLEAN" ]; then
+		endheader "400 Bad Request"
+	elif [[ "${HTTP_PATH,,}" == "/robots.txt" ]];then
+			echoheader "User-agent: *"
+			echoheader "Disallow: /"
+			endheader "200 OK"
+	elif [[ "$HTTP_PATH" == "/" ]];then
+			echobody "$(cat "$script_path/index.html")"
+			endheader "200 OK"
+	elif [[ "$LINE_CLEAN" =~ $regex_key ]]; then
 		ClientIPv4="$(getValueByKey "$LINE_CLEAN" 'ipv4')"
 		ClientIPv6="$(getValueByKey "$LINE_CLEAN" 'ipv6')"
 		ClientIP_CF=$(getValueByKey "$LINE_CLEAN" 'cf-connecting-ip')
@@ -202,9 +211,6 @@ getValueByKey() {
 			echoerr "BAD $rt"
 			endheader "403 Forbidden"
 		fi
-	elif [[ "$path" == "/" ]];then
-			echobody "$(cat "$script_path/index.html")"
-			endheader "200 OK"
 	else
 		endheader "404 Not Found"
 	fi
